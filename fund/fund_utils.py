@@ -121,11 +121,14 @@ def notification(code: str, buy: List[str] = None):
         print(e)
 
 
-def daily_notification() -> None:
-    buyStock = []
+def daily_notification(buystock=None):
+    buystock = []
     for code in fund_info.fund_id:
-        notification(code, buyStock)
-    print("Following Fund's current net value is lower than its MA20, please pay attention to them!\n", buyStock)
+        notification(code, buystock)
+    msg = 'Following Fund\'s current net value is lower than its MA20, please pay attention to them!\n' + str(buystock)
+    msg_d = str(buystock)
+    print(msg)
+    return msg_d
 
 
 def select_daily_ratio():
