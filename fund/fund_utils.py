@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import ast
 import re
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
@@ -132,7 +132,23 @@ def daily_notification(buystock=None):
 
 
 def select_daily_ratio():
-    pass  # todo：Identify all funds with a daily increase of more than 2.7% and decline of more than 2.5%
+    # Identify all funds with a daily increase of more than 2.7% and decline of more than 2.5%
+    increased_map: Dict[str, float] = {}
+    decreased_map: Dict[str, float] = {}
+    increased_params: float = 2.5
+    decreased_params: float = -2.5
+    for code in fund_info.fund_id:
+        if float(get_cur_value(code)['gszzl']) >= increased_params:
+            increased_map[str(get_cur_value(code)['name'])] = float(get_cur_value(code)['gszzl'])
+        if float(get_cur_value(code)['gszzl']) <= decreased_params:
+            decreased_map[str(get_cur_value(code)['name'])] = float(get_cur_value(code)['gszzl'])
+    return increased_map, decreased_map
 
 
-daily_notification()
+'''
+select_i, select_d = select_daily_ratio()
+sorted_select_i = sorted(select_i.items(), key=operator.itemgetter(1))
+sorted_select_d = sorted(select_d.items(), key=operator.itemgetter(1), reverse=True)
+print("Increased fund list:", sorted_select_i)
+print("Decreased fund list:", sorted_select_d)
+'''
