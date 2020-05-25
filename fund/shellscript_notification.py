@@ -9,7 +9,7 @@ from subprocess import call
 
 from fund import fund_utils
 
-msg = fund_utils.daily_notification(buystock=[])
+msg = fund_utils.daily_notification()
 
 cmd = 'display notification \"' + \
       "%s" % msg + '\" with title \"Daily Notes\"'
