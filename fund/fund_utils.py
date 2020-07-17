@@ -133,24 +133,35 @@ def notification(code: str, buy: List[str] = None) -> None:
     assert isinstance(code, str)
     buyStock = buy
     data = get_fund_data(code, per=20, sdate='2020-01-01', edate='2020-12-31')
-    data['净值日期'] = pd.to_datetime(data['净值日期'], format='%Y/%m/%d')
-    data['单位净值'] = data['单位净值'].astype(float)
-    data['累计净值'] = data['累计净值'].astype(float)
-    data['日增长率'] = data['日增长率'].str.strip('%').astype(float)
-    data = data.sort_values(by='净值日期', axis=0, ascending=True).reset_index(drop=True)
-    # ma20 = np.mean(data[-20:]['单位净值']).astype(float)
-    ma30 = np.mean(data[-30:]['单位净值']).astype(float)
+    ma20 = get_ma_data(code, 20)
     # 90 trading days data
     df90 = data[-90:][1::]
     df90.to_csv(local_file_path + '/data/' + '%s' % code + '.csv')
     current_worth_value = float(get_cur_value(code)["gsz"])
     current_fund_name = get_cur_value(code)['name']
     try:
-        if current_worth_value < ma30:
+        if current_worth_value < ma20:
             buyStock.append(current_fund_name)
     except ValueError as e:
         assert current_worth_value
         print(e)
+
+
+def get_ma_data(code: str, period: int) -> np.ndarray:
+    """
+    Get MA statistics via fund code
+    :param code: Fund code
+    :param period:  MA period
+    :return: MA statistics
+    """
+    data = get_fund_data(code, per=20, sdate='2020-01-01', edate='2020-12-31')
+    data['净值日期'] = pd.to_datetime(data['净值日期'], format='%Y/%m/%d')
+    data['单位净值'] = data['单位净值'].astype(float)
+    data['累计净值'] = data['累计净值'].astype(float)
+    data['日增长率'] = data['日增长率'].str.strip('%').astype(float)
+    data = data.sort_values(by='净值日期', axis=0, ascending=True).reset_index(drop=True)
+    ma = np.mean(data[-period:]['单位净值']).astype(float)
+    return ma
 
 
 def daily_notification() -> str:
@@ -161,7 +172,7 @@ def daily_notification() -> str:
     buystock = []
     for code in fund_info.fund_id:
         notification(code, buystock)
-    msg = 'Following Fund\'s current net value is lower than its MA30, please pay attention to them!\n' + str(buystock)
+    msg = 'Following Fund\'s current net value is lower than its MA20, please pay attention to them!\n' + str(buystock)
     msg_d = str(buystock)
     print(msg)
     return msg_d
